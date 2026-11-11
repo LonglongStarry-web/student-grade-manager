@@ -1,0 +1,34 @@
+{
+  "name": "student-grade-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "完全离线运行的 Windows 学生成绩管理系统",
+  "main": "main.js",
+  "author": "Student Grade Manager",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "37.10.3",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "productName": "学生成绩管理系统",
+    "files": [
+      "app.js",
+      "index.html",
+      "main.js",
+      "preload.js",
+      "styles.css"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "artifactName": "学生成绩管理系统-安装版-${version}-${arch}.${ext}"
+    }
+  }
+}

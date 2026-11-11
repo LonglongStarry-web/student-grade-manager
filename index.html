@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="完全离线运行的学生成绩管理系统">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'">
+  <title>学生成绩管理系统</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">成</span>
+      <div>
+        <h1>学生成绩管理系统</h1>
+        <p>离线版 · 数据仅保存在本机</p>
+      </div>
+    </div>
+    <div class="save-status" id="save-status" role="status">数据已保存</div>
+  </header>
+
+  <nav class="main-nav" aria-label="主导航">
+    <button class="nav-button is-active" data-view="dashboard">总览</button>
+    <button class="nav-button" data-view="base-data">基础资料</button>
+    <button class="nav-button" data-view="exams">考试与录分</button>
+    <button class="nav-button" data-view="analysis">统计分析</button>
+    <button class="nav-button" data-view="data-tools">数据与设置</button>
+  </nav>
+
+  <main class="page-shell">
+    <section class="view is-active" id="view-dashboard" aria-labelledby="dashboard-title">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">工作台</p>
+          <h2 id="dashboard-title">成绩总览</h2>
+        </div>
+        <button class="primary-button" data-go="exams">新建考试</button>
+      </div>
+      <div class="metric-grid" id="dashboard-metrics"></div>
+      <section class="content-section">
+        <div class="section-heading">
+          <div>
+            <h3>最近考试</h3>
+            <p>快速查看最新考试的录入进度和平均分</p>
+          </div>
+        </div>
+        <div id="recent-exams"></div>
+      </section>
+    </section>
+
+    <section class="view" id="view-base-data" aria-labelledby="base-data-title">
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">基础资料</p>
+          <h2 id="base-data-title">班级、学生与科目</h2>
+        </div>
+      </div>
+
+      <div class="management-grid">
+        <section class="management-panel">
+          <div class="section-heading compact">
+            <div><h3>班级</h3><p>例如：高一（1）班</p></div>
+          </div>
+          <form id="class-form" class="inline-form">
+            <input type="hidden" name="id">
+            <label><span>班级名称</span><input name="name" maxlength="30" required placeholder="输入班级名称"></label>
+            <div class="form-actions"><button class="primary-button" type="submit">保存班级</button><button class="text-button form-cancel" type="button" hidden>取消编辑</button></div>
+          </form>
+          <div id="class-list"></div>
+        </section>
+
+        <section class="management-panel">
+          <div class="section-heading compact">
+            <div><h3>科目</h3><p>例如：语文、数学</p></div>
+          </div>
+          <form id="subject-form" class="inline-form">
+            <input type="hidden" name="id">
+            <label><span>科目名称</span><input name="name" maxlength="20" required placeholder="输入科目名称"></label>
+            <div class="form-actions"><button class="primary-button" type="submit">保存科目</button><button class="text-button form-cancel" type="button" hidden>取消编辑</button></div>
+          </form>
+          <div id="subject-list"></div>
+        </section>
+      </div>
+
+      <section class="content-section">
+        <div class="section-heading">
+          <div><h3>学生名单</h3><p>学号在同一班级内不能重复</p></div>
+          <label class="compact-select"><span>查看班级</span><select id="student-class-filter"></select></label>
+        </div>
+        <form id="student-form" class="student-form">
+          <input type="hidden" name="id">
+          <label><span>所属班级</span><select name="classId" required></select></label>
+          <label><span>学号</span><input name="studentNo" maxlength="20" required placeholder="例如 001"></label>
+          <label><span>学生姓名</span><input name="name" maxlength="30" required placeholder="输入姓名"></label>
+          <div class="form-actions"><button class="primary-button" type="submit">保存学生</button><button class="text-button form-cancel" type="button" hidden>取消编辑</button></div>
+        </form>
+        <div id="student-list"></div>
+      </section>
+    </section>
+
+    <section class="view" id="view-exams" aria-labelledby="exams-title">
+      <div class="page-heading">
+        <div><p class="eyebrow">考试管理</p><h2 id="exams-title">考试与成绩录入</h2></div>
+      </div>
+      <section class="content-section" id="exam-create-section">
+        <div class="section-heading"><div><h3>新建或修改考试</h3><p>每场考试对应一个班级和一个科目</p></div></div>
+        <form id="exam-form" class="exam-form">
+          <input type="hidden" name="id">
+          <label><span>考试名称</span><input name="name" maxlength="40" required placeholder="例如：2026 春季期中考试"></label>
+          <label><span>日期</span><input name="date" type="date" required></label>
+          <label><span>班级</span><select name="classId" required></select></label>
+          <label><span>科目</span><select name="subjectId" required></select></label>
+          <div class="form-actions"><button class="primary-button" type="submit">保存考试</button><button class="text-button form-cancel" type="button" hidden>取消编辑</button></div>
+        </form>
+      </section>
+      <section class="content-section">
+        <div class="section-heading">
+          <div><h3>考试记录</h3><p>选择“录入成绩”进入整班录分</p></div>
+          <div class="filter-row">
+            <select id="exam-class-filter" aria-label="按班级筛选"></select>
+            <select id="exam-subject-filter" aria-label="按科目筛选"></select>
+          </div>
+        </div>
+        <div id="exam-list"></div>
+      </section>
+    </section>
+
+    <section class="view" id="view-score-entry" aria-labelledby="score-entry-title">
+      <div class="page-heading">
+        <div><p class="eyebrow">整班录分</p><h2 id="score-entry-title">录入成绩</h2><p class="page-subtitle" id="score-entry-meta"></p></div>
+        <button class="secondary-button" data-go="exams">返回考试列表</button>
+      </div>
+      <section class="content-section">
+        <div class="score-toolbar">
+          <p>成绩范围为 0–100；留空表示“缺考”。输入内容会自动保存。</p>
+          <div><button class="secondary-button" id="clear-scores" type="button">清空本场成绩</button><button class="primary-button" id="finish-score-entry" type="button">完成并查看分析</button></div>
+        </div>
+        <div id="score-entry-table"></div>
+      </section>
+    </section>
+
+    <section class="view" id="view-analysis" aria-labelledby="analysis-title">
+      <div class="page-heading">
+        <div><p class="eyebrow">统计分析</p><h2 id="analysis-title">班级成绩分析</h2></div>
+        <div class="heading-control"><label><span>选择考试</span><select id="analysis-exam-select"></select></label></div>
+      </div>
+      <div id="analysis-content"></div>
+
+      <section class="content-section student-history-section">
+        <div class="section-heading">
+          <div><h3>学生个人成绩</h3><p>查看一名学生在各次考试中的成绩变化</p></div>
+          <div class="filter-row"><select id="history-class-select" aria-label="选择班级"></select><select id="history-student-select" aria-label="选择学生"></select></div>
+        </div>
+        <div id="student-history"></div>
+      </section>
+    </section>
+
+    <section class="view" id="view-data-tools" aria-labelledby="data-tools-title">
+      <div class="page-heading"><div><p class="eyebrow">数据安全</p><h2 id="data-tools-title">数据与设置</h2></div></div>
+      <div class="tools-grid">
+        <section class="tool-panel">
+          <h3>完整备份</h3>
+          <p>导出 JSON 备份文件，包含全部班级、学生、考试和成绩。JSON 是一种结构化数据文件格式，适合完整恢复。</p>
+          <button class="primary-button" id="export-backup" type="button">导出完整备份</button>
+        </section>
+        <section class="tool-panel">
+          <h3>恢复备份</h3>
+          <p>从本系统导出的 JSON 文件恢复。恢复操作会覆盖当前全部数据。</p>
+          <label class="file-button">选择备份文件<input id="import-backup" type="file" accept="application/json,.json"></label>
+        </section>
+        <section class="tool-panel">
+          <h3>表格导出</h3>
+          <p>把某场考试导出为 CSV。CSV 是通用表格文本格式，可以用 Excel、WPS 等软件打开。</p>
+          <select id="csv-exam-select" aria-label="选择要导出的考试"></select>
+          <button class="secondary-button" id="export-csv" type="button">导出所选考试</button>
+        </section>
+        <section class="tool-panel">
+          <h3>示例数据</h3>
+          <p>首次体验时可生成一套演示数据。仅当系统中没有数据时可用。</p>
+          <button class="secondary-button" id="load-demo" type="button">生成示例数据</button>
+        </section>
+      </div>
+
+      <section class="content-section settings-section">
+        <div class="section-heading"><div><h3>统计标准</h3><p>修改后，所有考试的统计结果会立即重新计算</p></div></div>
+        <form id="settings-form" class="settings-form">
+          <label><span>及格分数</span><input name="passScore" type="number" min="0" max="100" step="1" required></label>
+          <label><span>优秀分数</span><input name="excellentScore" type="number" min="0" max="100" step="1" required></label>
+          <button class="primary-button" type="submit">保存标准</button>
+        </form>
+      </section>
+
+      <section class="danger-zone">
+        <div><h3>清空全部数据</h3><p>此操作无法撤销，建议先导出完整备份。</p></div>
+        <button class="danger-button" id="clear-all-data" type="button">清空全部数据</button>
+      </section>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="confirm-modal" hidden>
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title">请确认</h2>
+      <p id="confirm-message"></p>
+      <div class="dialog-actions"><button class="secondary-button" id="confirm-cancel" type="button">取消</button><button class="danger-button" id="confirm-ok" type="button">确认删除</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
